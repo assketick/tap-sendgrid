@@ -167,3 +167,54 @@ class StatsStream(SendGridStream):
                 break 
 
             offset = self.paginator.get_next(resp) # type: ignore
+
+
+class StatsByBrowserStream(SendGridStream):
+
+    name = "stats_by_browser"
+    path = "/browsers/stats"
+    primary_keys = "date" # type: ignore
+    replication_key = "date" # type: ignore
+    schema = th.PropertiesList(
+        th.Property("date", th.DateType),
+        th.Property("stats", th.ArrayType(
+            th.ObjectType(
+                th.Property('type', th.StringType),
+                th.Property('name', th.StringType),
+                th.Property('metrics', th.ObjectType(
+                    th.Property('clicks', th.IntegerType),
+                    th.Property('unique_clicks', th.IntegerType),
+                ))
+            )
+        )),
+    ).to_dict()  # type: ignore
+
+    def get_records(self, context: dict | None) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+
+        page_size = self.page_size
+        offset = 0
+        start_date = self.get_starting_timestamp(context)
+        if not start_date:
+            start_date = datetime.datetime.strptime(
+            self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
+        )
+
+        while True:
+            resp = self.conn.client.browsers.stats.get(
+                request_headers=self.headers,
+                query_params={
+                    "start_date": start_date.strftime('%Y-%m-%d'),
+                    "offset": offset,
+                    "limit": page_size,
+                },
+            ) # type: ignore
+            yield from resp.to_dict # type: ignore
+
+            if not self.paginator.has_more(resp): # type: ignore
+                break 
+
+            offset = self.paginator.get_next(resp) # type: ignore
