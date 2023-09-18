@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from typing import Iterable, Optional
-
+from pendulum.parser import parse
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_sendgrid.client import SendGridStream
@@ -146,11 +146,13 @@ class StatsStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
 
         while True:
             resp = self.conn.client.stats.get(
@@ -197,11 +199,14 @@ class StatsByBrowserStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
+
 
         while True:
             resp = self.conn.client.browsers.stats.get(
@@ -247,11 +252,13 @@ class StatsByClientStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
 
         while True:
             resp = self.conn.client.clients.stats.get(
@@ -299,11 +306,14 @@ class StatsByCountryStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
+
 
         while True:
             resp = self.conn.client.geo.stats.get(
@@ -348,11 +358,13 @@ class StatsByDevicesStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
 
         while True:
             resp = self.conn.client.devices.stats.get(
@@ -407,11 +419,13 @@ class StatsByMailboxProviderStream(SendGridStream):
 
         page_size = self.page_size
         offset = 0
-        start_date = self.get_starting_timestamp(context)
+        start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
             self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
         )
+        else:
+            start_date = parse(start_date)
 
         while True:
             resp = self.conn.client.mailbox_providers.stats.get(
