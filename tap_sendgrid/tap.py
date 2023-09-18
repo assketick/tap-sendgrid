@@ -5,7 +5,17 @@ from __future__ import annotations
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
 
-from tap_sendgrid.streams import BouncesStream, SendGridStream, EmailActivitySteam
+from tap_sendgrid.streams import (
+    BouncesStream,
+    SendGridStream, 
+    EmailActivitySteam, 
+    StatsStream,
+    StatsByBrowserStream,
+    StatsByClientStream,
+    StatsByCountryStream,
+    StatsByDevicesStream,
+    StatsByMailboxProviderStream,
+)
 
 
 class TapSendGrid(Tap):
@@ -48,7 +58,13 @@ class TapSendGrid(Tap):
         """
         return [
             BouncesStream(self, paginator_type="offset"),
-            EmailActivitySteam(self, paginator_type="base"),
+            # EmailActivitySteam(self, paginator_type="base"),
+            StatsStream(self, paginator_type='offset'),
+            StatsByBrowserStream(self, paginator_type='offset'),
+            StatsByClientStream(self, paginator_type='offset'),
+            StatsByCountryStream(self, paginator_type='offset'),
+            StatsByDevicesStream(self, paginator_type='offset'),
+            StatsByMailboxProviderStream(self, paginator_type='offset'),
         ]
 
 
