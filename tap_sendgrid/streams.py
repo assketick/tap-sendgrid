@@ -113,7 +113,7 @@ class StatsStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('metrics', th.ObjectType(
@@ -178,7 +178,7 @@ class StatsByBrowserStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -231,7 +231,7 @@ class StatsByClientStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -283,7 +283,7 @@ class StatsByCountryStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -337,7 +337,7 @@ class StatsByDevicesStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -388,7 +388,7 @@ class StatsByMailboxProviderStream(SendGridStream):
     primary_keys = "date" # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.DateType),
+        th.Property("date", th.StringType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
