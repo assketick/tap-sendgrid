@@ -110,10 +110,10 @@ class StatsStream(SendGridStream):
 
     name = "stats"
     path = "/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('metrics', th.ObjectType(
@@ -175,10 +175,10 @@ class StatsByBrowserStream(SendGridStream):
 
     name = "stats_by_browser"
     path = "/browsers/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -228,10 +228,10 @@ class StatsByClientStream(SendGridStream):
 
     name = "stats_by_client"
     path = "/clients/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -280,10 +280,10 @@ class StatsByCountryStream(SendGridStream):
 
     name = "stats_by_country"
     path = "/geo/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -334,10 +334,10 @@ class StatsByCountryStream(SendGridStream):
 class StatsByDevicesStream(SendGridStream):
     name = "stats_by_devices"
     path = "/devices/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
@@ -385,10 +385,10 @@ class StatsByDevicesStream(SendGridStream):
 class StatsByMailboxProviderStream(SendGridStream):
     name = "stats_by_mailbox_provider"
     path = "/mailbox_providers/stats"
-    primary_keys = "date" # type: ignore
+    primary_keys = ["date"] # type: ignore
     replication_key = "date" # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
+        th.Property("date", th.DateType),
         th.Property("stats", th.ArrayType(
             th.ObjectType(
                 th.Property('type', th.StringType),
