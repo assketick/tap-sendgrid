@@ -57,14 +57,14 @@ class TapSendGrid(Tap):
             A list of discovered streams.
         """
         return [
-            BouncesStream(self, paginator_type="offset"),
+            # BouncesStream(self, paginator_type="offset"),
             # EmailActivitySteam(self, paginator_type="base"),
             StatsStream(self, paginator_type='offset'),
-            StatsByBrowserStream(self, paginator_type='offset'),
-            StatsByClientStream(self, paginator_type='offset'),
-            StatsByCountryStream(self, paginator_type='offset'),
-            StatsByDevicesStream(self, paginator_type='offset'),
-            StatsByMailboxProviderStream(self, paginator_type='offset'),
+            # StatsByBrowserStream(self, paginator_type='offset'),
+            # StatsByClientStream(self, paginator_type='offset'),
+            # StatsByCountryStream(self, paginator_type='offset'),
+            # StatsByDevicesStream(self, paginator_type='offset'),
+            # StatsByMailboxProviderStream(self, paginator_type='offset'),
         ]
 
 

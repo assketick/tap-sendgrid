@@ -108,33 +108,34 @@ class EmailActivitySteam(SendGridStream):
 
 class StatsStream(SendGridStream):
 
-    name = "stats"
-    path = "/stats"
-    primary_keys = ["date"] # type: ignore
-    replication_key = "date" # type: ignore
+    name = "marketplace_campaigns_stats"
+    path = "/v3/marketing/stats/automations"
+    primary_keys = ["id"] # type: ignore
+    replication_key = None # type: ignore
     schema = th.PropertiesList(
-        th.Property("date", th.StringType),
-        th.Property("stats", th.ArrayType(
+        th.Property("results", th.ArrayType(
             th.ObjectType(
-                th.Property('metrics', th.ObjectType(
-                    th.Property('blocks', th.IntegerType),
+                th.Property('id', th.StringType),
+                th.Property('step_id', th.StringType),
+                th.Property('aggregation', th.StringType),
+                th.Property('stats', th.ObjectType(
                     th.Property('bounce_drops', th.IntegerType),
                     th.Property('bounces', th.IntegerType),
                     th.Property('clicks', th.IntegerType),
-                    th.Property('deferred', th.IntegerType),
+                    th.Property('unique_clicks', th.IntegerType),
                     th.Property('delivered', th.IntegerType),
                     th.Property('invalid_emails', th.IntegerType),
                     th.Property('opens', th.IntegerType),
-                    th.Property('processed', th.IntegerType),
+                    th.Property('unique_opens', th.IntegerType),
                     th.Property('requests', th.IntegerType),
                     th.Property('spam_report_drops', th.IntegerType),
                     th.Property('spam_reports', th.IntegerType),
-                    th.Property('unique_clicks', th.IntegerType),
-                    th.Property('unique_opens', th.IntegerType),
-                    th.Property('unsubscribe_drops', th.IntegerType),
                     th.Property('unsubscribes', th.IntegerType),
                 ))
             )
+        )),
+        th.Property("_metadata", th.ObjectType(
+            th.Property('self', th.StringType),
         )),
     ).to_dict()  # type: ignore
 
@@ -155,12 +156,12 @@ class StatsStream(SendGridStream):
             start_date = parse(start_date)
 
         while True:
-            resp = self.conn.client.stats.get(
+            resp = self.conn.client.marketing.stats.automations.get(
                 request_headers=self.headers,
                 query_params={
-                    "start_date": start_date.strftime('%Y-%m-%d'),
-                    "offset": offset,
-                    "limit": page_size,
+                    # "start_date": start_date.strftime('%Y-%m-%d'),
+                    # "offset": offset,
+                    "page_size": 50,
                 },
             ) # type: ignore
             yield from resp.to_dict # type: ignore
