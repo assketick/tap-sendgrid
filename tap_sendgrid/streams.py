@@ -7,6 +7,7 @@ import logging
 from typing import Iterable, Optional
 from pendulum.parser import parse
 from singer_sdk import typing as th  # JSON Schema typing helpers
+from python_http_client.exceptions import NotFoundError
 
 from tap_sendgrid.client import SendGridStream
 
@@ -106,37 +107,15 @@ class EmailActivitySteam(SendGridStream):
 
             end_time = self.paginator.get_last(resp)
 
-class StatsStream(SendGridStream):
 
-    name = "marketplace_campaigns_stats"
+class AutomationIdsStream(SendGridStream):
+
+    name = "marketing_campaign_ids"
     path = "/v3/marketing/stats/automations"
     primary_keys = ["id"] # type: ignore
     replication_key = None # type: ignore
     schema = th.PropertiesList(
-        th.Property("results", th.ArrayType(
-            th.ObjectType(
-                th.Property('id', th.StringType),
-                th.Property('step_id', th.StringType),
-                th.Property('aggregation', th.StringType),
-                th.Property('stats', th.ObjectType(
-                    th.Property('bounce_drops', th.IntegerType),
-                    th.Property('bounces', th.IntegerType),
-                    th.Property('clicks', th.IntegerType),
-                    th.Property('unique_clicks', th.IntegerType),
-                    th.Property('delivered', th.IntegerType),
-                    th.Property('invalid_emails', th.IntegerType),
-                    th.Property('opens', th.IntegerType),
-                    th.Property('unique_opens', th.IntegerType),
-                    th.Property('requests', th.IntegerType),
-                    th.Property('spam_report_drops', th.IntegerType),
-                    th.Property('spam_reports', th.IntegerType),
-                    th.Property('unsubscribes', th.IntegerType),
-                ))
-            )
-        )),
-        th.Property("_metadata", th.ObjectType(
-            th.Property('self', th.StringType),
-        )),
+        th.Property('id', th.StringType),
     ).to_dict()  # type: ignore
 
     def get_records(self, context: dict | None) -> Iterable[dict]:
@@ -144,9 +123,57 @@ class StatsStream(SendGridStream):
 
         Each row emitted should be a dictionary of property names to their values.
         """
+        page_size = self.page_size if self.page_size <= 50 else 50
+        resp = self.conn.client.marketing.stats.automations.get(
+            request_headers=self.headers,
+            query_params={
+                "page_size": page_size,
+            },
+        )
+        yield from resp.to_dict['results']
 
+    def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
+        """Return a context dictionary for child streams."""
+
+        return {
+            "automation_id": record["id"],
+        }
+
+class AutomationStatsStream(SendGridStream):
+
+    name = "marketing_campaign_stats"
+    path = "/v3/marketing/stats/automations/{id}"
+    primary_keys = ["id", "aggregation"] # type: ignore
+    replication_key = None # type: ignore
+    parent_stream_type = AutomationIdsStream
+    ignore_parent_replication_keys = True
+    schema = th.PropertiesList(
+            th.Property('id', th.StringType),
+            th.Property('step_id', th.StringType),
+            th.Property('aggregation', th.StringType),
+            th.Property('stats', th.ObjectType(
+                th.Property("bounce_drops", th.IntegerType),
+                th.Property("bounces", th.IntegerType),
+                th.Property("clicks", th.IntegerType),
+                th.Property("unique_clicks", th.IntegerType),
+                th.Property("delivered", th.IntegerType),
+                th.Property("invalid_emails", th.IntegerType),
+                th.Property("opens", th.IntegerType),
+                th.Property("unique_opens", th.IntegerType),
+                th.Property("requests", th.IntegerType),
+                th.Property("spam_report_drops", th.IntegerType),
+                th.Property("spam_reports", th.IntegerType),
+                th.Property("unsubscribes", th.IntegerType),
+            )),
+    ).to_dict()  # type: ignore
+
+    def get_records(self, context: dict | None) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
         page_size = self.page_size
-        offset = 0
+        automation_id = context.get('automation_id')
         start_date = self.get_starting_replication_key_value(context)
         if not start_date:
             start_date = datetime.datetime.strptime(
@@ -154,22 +181,25 @@ class StatsStream(SendGridStream):
         )
         else:
             start_date = parse(start_date)
+        
 
         while True:
-            resp = self.conn.client.marketing.stats.automations.get(
-                request_headers=self.headers,
-                query_params={
-                    # "start_date": start_date.strftime('%Y-%m-%d'),
-                    # "offset": offset,
-                    "page_size": 50,
-                },
-            ) # type: ignore
-            yield from resp.to_dict # type: ignore
+            try:
+                resp = self.conn.client.marketing.stats.automations._(automation_id).get(
+                    request_headers=self.headers,
+                    query_params={
+                        'aggregated_by': 'day', 
+                        'start_date': '2023-06-01',
+                        'timezone': 'UTC', 
+                        'page_size': 50
+                    },
+                ) # type: ignore
+                yield from resp.to_dict['results'] # type: ignore
 
-            if not self.paginator.has_more(resp): # type: ignore
-                break 
-
-            offset = self.paginator.get_next(resp) # type: ignore
+                if not self.paginator.has_more(resp): # type: ignore
+                    break
+            except NotFoundError:
+                break
 
 
 class StatsByBrowserStream(SendGridStream):

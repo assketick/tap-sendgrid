@@ -8,8 +8,9 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 from tap_sendgrid.streams import (
     BouncesStream,
     SendGridStream, 
-    EmailActivitySteam, 
-    StatsStream,
+    AutomationIdsStream,
+    EmailActivitySteam,
+    AutomationStatsStream,
     StatsByBrowserStream,
     StatsByClientStream,
     StatsByCountryStream,
@@ -57,14 +58,15 @@ class TapSendGrid(Tap):
             A list of discovered streams.
         """
         return [
-            # BouncesStream(self, paginator_type="offset"),
-            # EmailActivitySteam(self, paginator_type="base"),
-            StatsStream(self, paginator_type='offset'),
-            # StatsByBrowserStream(self, paginator_type='offset'),
-            # StatsByClientStream(self, paginator_type='offset'),
-            # StatsByCountryStream(self, paginator_type='offset'),
-            # StatsByDevicesStream(self, paginator_type='offset'),
-            # StatsByMailboxProviderStream(self, paginator_type='offset'),
+            AutomationIdsStream(self, paginator_type="offset"),
+            AutomationStatsStream(self, paginator_type="offset"),
+            BouncesStream(self, paginator_type="offset"),
+            EmailActivitySteam(self, paginator_type="base"),
+            StatsByBrowserStream(self, paginator_type='offset'),
+            StatsByClientStream(self, paginator_type='offset'),
+            StatsByCountryStream(self, paginator_type='offset'),
+            StatsByDevicesStream(self, paginator_type='offset'),
+            StatsByMailboxProviderStream(self, paginator_type='offset'),
         ]
 
 
