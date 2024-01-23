@@ -13,6 +13,70 @@ from tap_sendgrid.client import SendGridStream
 
 LOGGER = logging.getLogger(__name__)
 
+class StatsStream(SendGridStream):
+
+    name = "stats"
+    path = "/stats"
+    primary_keys = ["date"] # type: ignore
+    replication_key = "date" # type: ignore
+    schema = th.PropertiesList(
+        th.Property("date", th.StringType),
+        th.Property("stats", th.ArrayType(
+            th.ObjectType(
+                th.Property('metrics', th.ObjectType(
+                    th.Property('blocks', th.IntegerType),
+                    th.Property('bounce_drops', th.IntegerType),
+                    th.Property('bounces', th.IntegerType),
+                    th.Property('clicks', th.IntegerType),
+                    th.Property('deferred', th.IntegerType),
+                    th.Property('delivered', th.IntegerType),
+                    th.Property('invalid_emails', th.IntegerType),
+                    th.Property('opens', th.IntegerType),
+                    th.Property('processed', th.IntegerType),
+                    th.Property('requests', th.IntegerType),
+                    th.Property('spam_report_drops', th.IntegerType),
+                    th.Property('spam_reports', th.IntegerType),
+                    th.Property('unique_clicks', th.IntegerType),
+                    th.Property('unique_opens', th.IntegerType),
+                    th.Property('unsubscribe_drops', th.IntegerType),
+                    th.Property('unsubscribes', th.IntegerType),
+                ))
+            )
+        )),
+    ).to_dict()  # type: ignore
+
+    def get_records(self, context: dict | None) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+
+        page_size = self.page_size
+        offset = 0
+        start_date = self.get_starting_replication_key_value(context)
+        if not start_date:
+            start_date = datetime.datetime.strptime(
+            self.config["start_datetime"], "%Y-%m-%dT%H:%M:%SZ"
+        )
+        else:
+            start_date = parse(start_date)
+
+        while True:
+            resp = self.conn.client.stats.get(
+                request_headers=self.headers,
+                query_params={
+                    "start_date": start_date.strftime('%Y-%m-%d'),
+                    "offset": offset,
+                    "limit": page_size,
+                },
+            ) # type: ignore
+            yield from resp.to_dict # type: ignore
+
+            if not self.paginator.has_more(resp): # type: ignore
+                break 
+
+            offset = self.paginator.get_next(resp) # type: ignore
+
 
 class BouncesStream(SendGridStream):
     """Define custom stream."""
